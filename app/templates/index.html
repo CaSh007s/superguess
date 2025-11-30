@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperGuess | The Ultimate Challenge</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Google Fonts for that Arcade look -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <button id="theme-btn" onclick="toggleTheme()" class="btn btn-secondary" 
+        style="position: absolute; top: 20px; right: 20px; width: auto; font-size: 0.8rem; z-index: 10;">
+    🕹️ MODE: ARCADE
+    </button>
+
+    <!-- MAIN CONTAINER -->
+    <div class="container fade-in">
+        <div class="glass-card">
+            <h1 class="logo">SUPER<span class="highlight">GUESS</span></h1>
+            <p class="subtitle">Can you crack the code?</p>
+
+            <form action="{{ url_for('main.start_game') }}" method="POST">
+                
+                <div class="difficulty-selector">
+                    <label for="difficulty">SELECT CLEARANCE LEVEL</label>
+                    <select name="difficulty" id="difficulty" class="neon-input">
+                        <option value="easy">LEVEL 1: ROOKIE (1-50)</option>
+                        <option value="medium">LEVEL 2: AGENT (1-200)</option>
+                        <option value="hard">LEVEL 3: GRANDMASTER (1-1000)</option>
+                        <option value="chaos" style="color: #ff4757; font-weight: bold;">⚠️ LEVEL 4: CHAOS (TIME ATTACK)</option>
+                    </select>
+                </div>
+
+                <!-- UNLIMITED LIVES TOGGLE -->
+                <div class="toggle-container" style="margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border: 1px solid #444;">
+                    <label for="unlimited" style="margin: 0; cursor: pointer; color: var(--neon-pink); font-family: 'Orbitron'; font-size: 0.9rem;">
+                        ♾️ UNLIMITED LIVES
+                    </label>
+                        <label class="switch">
+                            <input type="checkbox" name="unlimited" id="unlimited">
+                            <span class="slider round"></span>
+                    </label>
+                </div>
+
+                <div class="menu-buttons">
+                    <button type="submit" class="btn btn-primary glitch-effect">INITIATE GAME</button>
+                    <button type="button" class="btn btn-secondary" onclick="openRules()">HOW TO PLAY</button>
+                    <a href="{{ url_for('main.leaderboard') }}" class="btn btn-secondary" style="display: block; text-decoration: none; text-align: center;">HALL OF FAME</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- HOW TO PLAY SPLASH SCREEN (MODAL) -->
+<div id="rulesModal" class="modal-overlay">
+    <div class="modal-content glass-card" style="max-width: 700px;">
+        <span class="close-btn" onclick="closeRules()">&times;</span>
+        <h2 style="color: var(--neon-blue); margin-top: 0;">MISSION PROTOCOLS</h2>
+        
+        <div class="rules-grid">
+            <!-- COLUMN 1: BASICS -->
+            <div class="rule-column">
+                <h3 class="rule-title">🎯 THE OBJECTIVE</h3>
+                <p>Locate the hidden "Secret Number" within the range.</p>
+                
+                <h3 class="rule-title">🌡️ PROXIMITY SENSORS</h3>
+                <p>The bar indicates <strong>Absolute Distance</strong> from the target:</p>
+                <ul class="stats-list" style="text-align: left;">
+                    <li><span style="color: #ff0000;">🟥 BURNING HOT</span> : &lt; 3 away</li>
+                    <li><span style="color: #ff4757;">🟥 HOT</span> : &lt; 10 away</li>
+                    <li><span style="color: #ffa502;">🟧 WARM</span> : &lt; 25 away</li>
+                    <li><span style="color: #eccc68;">🟨 COOL</span> : &lt; 50 away</li>
+                    <li><span style="color: #1e90ff;">🟦 COLD</span> : &lt; 100 away</li>
+                    <li><span style="color: #a29bfe;">🟪 FREEZING</span> : &gt; 100 away</li>
+                </ul>
+            </div>
+
+            <!-- COLUMN 2: MODES & SCORING -->
+            <div class="rule-column">
+                <h3 class="rule-title">⚠️ DIFFICULTY MODES</h3>
+                <ul class="stats-list" style="text-align: left;">
+                    <li><strong>Rookie:</strong> 1-50 (10 Lives)</li>
+                    <li><strong>Agent:</strong> 1-200 (7 Lives)</li>
+                    <li><strong>Grandmaster:</strong> 1-1000 (5 Lives)</li>
+                    <li><strong>⚠️ CHAOS:</strong> Time Attack. 30s Start. +10s per win. Infinite Streak.</li>
+                </ul>
+
+                <h3 class="rule-title">🏆 SCORING ECONOMY</h3>
+                <p>Start with <strong>1000-5000</strong> pts based on level.</p>
+                <ul class="stats-list" style="text-align: left;">
+                    <li><strong>Time:</strong> -2 pts / sec</li>
+                    <li><strong>Wrong Guess:</strong> -50 pts</li>
+                    <li><strong>Math Hint:</strong> -150 pts (Checks Primes, Multiples)</li>
+                    <li><strong>Unlimited Mode:</strong> Score Halved. No High Score entry.</li>
+                </ul>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="closeRules()">ACCEPT MISSION</button>
+    </div>
+</div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

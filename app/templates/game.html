@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperGuess | System Active</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- MUTE BUTTON ROW -->
+        <div style="width: 100%; max-width: 600px; display: flex; justify-content: flex-end; margin-bottom: 10px;">
+            <button id="mute-btn" onclick="toggleMute()" class="btn btn-secondary" style="width: auto; padding: 5px 15px; font-size: 0.8rem;">
+                🔊 SOUND ON
+            </button>
+        </div>
+
+        <!-- HEADS UP DISPLAY (HUD) -->
+        <div class="hud">
+            <div class="hud-item">
+                <span class="hud-label">LEVEL</span>
+                <span class="hud-value" id="level-indicator">{{ difficulty|upper }}</span>
+            </div>
+            
+            <div class="hud-item">
+                <span class="hud-label">TIME</span>
+                <span id="timer-display" class="hud-value highlight">00:00</span>
+            </div>
+
+            <div class="hud-item">
+                <!-- CHAOS MODE: Show Streak -->
+                {% if difficulty == 'chaos' %}
+                    <span class="hud-label" style="color: var(--neon-pink);">STREAK</span>
+                    <span id="streak-display" class="hud-value highlight">0</span>
+                    <!-- Hidden lives element so JS doesn't break -->
+                    <span id="lives-display" style="display:none;"></span>
+
+                <!-- STANDARD MODES: Show Lives -->
+                {% else %}
+                    <span class="hud-label">LIVES</span>
+                    <span id="lives-display" class="hud-value highlight">
+                        {% if unlimited %}∞{% else %}{{ lives }}{% endif %}
+                    </span>
+                {% endif %}
+            </div>
+
+            <div class="hud-item">
+                <span class="hud-label">RANGE</span>
+                <span class="hud-value">1 - {{ range_top }}</span>
+            </div>
+        </div>
+
+        <!-- THE MAIN GAME CARD -->
+        <div class="glass-card game-card">
+            
+            <!-- THE PROXIMITY BAR -->
+            <div class="bar-container">
+                <div class="bar-background">
+                    <div id="proximity-bar" class="bar-fill" style="width: 0%;"></div>
+                </div>
+                <p id="feedback-text" class="feedback-pulse">Awaiting Signal...</p>
+            </div>
+
+            <!-- INPUT AREA -->
+            <div class="input-area">
+                <input type="number" id="user-guess" class="neon-input big-input" placeholder="00" autofocus>
+                <button onclick="submitGuess()" class="btn btn-primary">SCAN</button>
+            </div>
+
+            <!-- HINT BUTTON AREA -->
+            <div style="margin-top: 15px;">
+                <button onclick="getHint()" class="btn btn-secondary" style="font-size: 0.8rem;">
+                    🛑 BUY MATH HINT (-150 PTS)
+                </button>
+                <p id="hint-display" style="color: var(--neon-pink); font-style: italic; margin-top: 10px; height: 20px;"></p>
+            </div>
+
+            <!-- HISTORY LOG -->
+            <div class="history-log">
+                <p>TRANSMISSION HISTORY:</p>
+                <div id="history-list" class="history-chips">
+                    <!-- Javascript will insert numbers here -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    
+    <!-- Enter Key Logic -->
+    <script>
+        document.getElementById("user-guess").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                submitGuess();
+            }
+        });
+    </script>
+</body>
+</html>

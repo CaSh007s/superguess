@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mission Report</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container fade-in">
+        <div class="glass-card">
+            
+            <!-- DYNAMIC HEADER -->
+            {% if score > 0 %}
+                <h1 class="logo" style="color: #2ed573; text-shadow: 0 0 15px #2ed573;">MISSION ACCOMPLISHED</h1>
+            {% else %}
+                <h1 class="logo" style="color: #ff4757; text-shadow: 0 0 15px #ff4757;">MISSION FAILED</h1>
+            {% endif %}
+
+            <!-- SCORE CARD -->
+            <div class="score-board">
+                <div class="score-item">
+                    <p class="subtitle">FINAL SCORE</p>
+                    <h2 class="giant-text">{{ score }}</h2>
+                </div>
+                
+                <div class="score-item">
+                    <p class="subtitle">BEST ({{ difficulty|upper }})</p>
+                    <h2 class="highlight">{{ highscore }}</h2>
+                </div>
+            </div>
+
+            {% if is_new_record %}
+            <div class="new-record-alert">
+                🚨 NEW HIGH SCORE DETECTED 🚨
+            </div>
+            {% endif %}
+
+            <div class="menu-buttons" style="margin-top: 2rem;">
+                <a href="{{ url_for('main.index') }}" class="btn btn-primary">RETURN TO BASE</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

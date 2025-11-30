@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hall of Fame</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container fade-in">
+        <div class="glass-card" style="max-width: 600px;">
+            <h1 class="logo">HALL OF <span class="highlight">FAME</span></h1>
+            
+            <div class="leaderboard-container" style="margin: 2rem 0;">
+                <table class="neon-table">
+                    <thead>
+                        <tr>
+                            <th>MISSION</th>
+                            <th>TOP SCORE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ROOKIE (EASY)</td>
+                            <td class="score-val">{{ scores.get('easy', 0) }}</td>
+                        </tr>
+                        <tr>
+                            <td>AGENT (MED)</td>
+                            <td class="score-val">{{ scores.get('medium', 0) }}</td>
+                        </tr>
+                        <tr>
+                            <td>GRANDMASTER (HARD)</td>
+                            <td class="score-val">{{ scores.get('hard', 0) }}</td>
+                        </tr>
+                        <tr>
+                            <td style="color: #ff4757;">⚠️ CHAOS MODE</td>
+                            <td class="score-val highlight">{{ scores.get('chaos', 0) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="menu-buttons">
+                <a href="{{ url_for('main.index') }}" class="btn btn-secondary">BACK TO MENU</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
