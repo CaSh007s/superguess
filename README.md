@@ -10,7 +10,7 @@
 > **Can you crack the code before time runs out?**
 > SuperGuess is a modern, full-stack web application that reinvents the classic "Guess the Number" game with arcade mechanics, dynamic visuals, and high-stakes gameplay.
 ---
-**[Play SuperGuess Online](https://superguess-arcade.onrender.com)**
+**[Play SuperGuess Online](https://superguess.onrender.com)**
 
 ---
 
