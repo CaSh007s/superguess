@@ -19,8 +19,9 @@ def create_app():
     if redis_url:
         # Scale to multiple workers
         socketio.init_app(app, message_queue=redis_url)
-        # Scale rate-limiter
-        limiter.init_app(app, storage_uri=redis_url)
+        # Scale rate-limiter via config
+        app.config["RATELIMIT_STORAGE_URI"] = redis_url
+        limiter.init_app(app)
     else:
         # Standard local memory
         socketio.init_app(app)
