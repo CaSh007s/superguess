@@ -130,9 +130,17 @@
 
       .chat-message {
         background: rgba(255, 255, 255, 0.05);
-        padding: 5px 10px;
-        border-radius: 8px;
-        word-break: break-all;
+        padding: 8px 12px;
+        border-radius: 12px;
+        word-break: break-word; /* Fixed word-wrapping breaking etiquette */
+        transition:
+          transform 0.2s,
+          background 0.2s;
+      }
+
+      .chat-message:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.1);
       }
 
       .chat-message.system {
@@ -147,6 +155,8 @@
         padding: 10px;
         border-top: 1px solid var(--border-color);
         background: rgba(0, 0, 0, 0.8);
+        position: relative;
+        align-items: center;
       }
 
       .chat-input {
@@ -164,6 +174,48 @@
         color: var(--neon-pink);
         cursor: pointer;
         font-weight: bold;
+        transition: color 0.2s;
+      }
+      .chat-btn:hover {
+        color: var(--neon-blue);
+      }
+
+      .emoji-btn {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        margin-right: 8px;
+        transition: transform 0.2s;
+      }
+      .emoji-btn:hover {
+        transform: scale(1.1);
+      }
+
+      .emoji-dropup {
+        display: none;
+        position: absolute;
+        bottom: 100%;
+        left: 10px;
+        margin-bottom: 10px;
+        background: rgba(0, 0, 0, 0.9);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 10px;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 100;
+        box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.5);
+      }
+
+      .emoji-option {
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: 5px;
+        transition: background 0.2s;
+      }
+      .emoji-option:hover {
+        background: rgba(255, 255, 255, 0.1);
       }
 
       /* Mobile handling */
@@ -342,10 +394,26 @@
         <div class="chat-panel">
           <div class="chat-messages" id="chatBox">
             <div class="chat-message system">
-              Welcome to the Room. Address etiquette is monitored.
+              Welcome to the Room.<br />Address etiquette is monitored.
             </div>
           </div>
           <div class="chat-input-area">
+            <div id="emojiDropup" class="emoji-dropup">
+              <span class="emoji-option" onclick="sendQuickChat('gg')"
+                >🎉 GG</span
+              >
+              <span class="emoji-option" onclick="sendQuickChat('gl')"
+                >🍀 GL</span
+              >
+              <span class="emoji-option" onclick="sendQuickChat('close')"
+                >🥵 Close!</span
+              >
+              <span class="emoji-option" onclick="sendQuickChat('wow')"
+                >🤯 Wow</span
+              >
+            </div>
+            <button class="emoji-btn" onclick="toggleEmojiDropup()">😊</button>
+
             <input
               type="text"
               id="chatInput"
@@ -355,29 +423,6 @@
               onkeypress="handleChatEnter(event)"
             />
             <button class="chat-btn" onclick="sendChat()">SEND</button>
-          </div>
-          <!-- Quick Emotes -->
-          <div
-            style="
-              display: flex;
-              gap: 5px;
-              padding: 5px 10px;
-              background: rgba(0, 0, 0, 0.6);
-              overflow-x: auto;
-            "
-          >
-            <span style="cursor: pointer" onclick="sendQuickChat('gg')"
-              >🎉GG</span
-            >
-            <span style="cursor: pointer" onclick="sendQuickChat('gl')"
-              >🍀GL</span
-            >
-            <span style="cursor: pointer" onclick="sendQuickChat('close')"
-              >🥵Close!</span
-            >
-            <span style="cursor: pointer" onclick="sendQuickChat('wow')"
-              >🤯Wow</span
-            >
           </div>
         </div>
       </div>

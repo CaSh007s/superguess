@@ -7,4 +7,5 @@ MarkupSafe==3.0.3
 Werkzeug==3.1.4
 gunicorn
 Flask-SocketIO==5.5.0
-eventlet==0.40.3
+gevent
+gevent-websocket

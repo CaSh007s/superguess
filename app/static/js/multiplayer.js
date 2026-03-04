@@ -223,7 +223,28 @@ function sendQuickChat(code) {
     wow: "Wow! 🤯",
   };
   socket.emit("chat_message", { room_id: ROOM_ID, message: msgs[code] });
+  document.getElementById("emojiDropup").style.display = "none";
 }
+
+function toggleEmojiDropup() {
+  const dropup = document.getElementById("emojiDropup");
+  if (dropup.style.display === "none" || dropup.style.display === "") {
+    dropup.style.display = "flex";
+  } else {
+    dropup.style.display = "none";
+  }
+}
+
+// Close dropup if clicked outside
+document.addEventListener("click", function (event) {
+  const dropup = document.getElementById("emojiDropup");
+  if (!dropup) return;
+  const isClickInside =
+    dropup.contains(event.target) || event.target.closest(".emoji-btn");
+  if (!isClickInside && dropup.style.display === "flex") {
+    dropup.style.display = "none";
+  }
+});
 
 function addSystemChat(msg) {
   const chatBox = document.getElementById("chatBox");
