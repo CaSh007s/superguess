@@ -6,6 +6,7 @@ import os
 import uuid
 from flask import current_app
 from app.engine.multiplayer import rooms, get_range_top
+from app import limiter
 
 main = Blueprint('main', __name__)
 
@@ -14,6 +15,7 @@ def multiplayer_setup():
     return render_template('multiplayer_setup.html')
 
 @main.route('/multiplayer/create', methods=['POST'])
+@limiter.limit("10 per minute")
 def multiplayer_create():
     difficulty = request.form.get('difficulty', 'easy')
     room_id = str(uuid.uuid4())[:8] # Short UUID
@@ -83,6 +85,7 @@ def game_board():
                            range_top=session.get('range_top'))
 
 @main.route('/guess', methods=['POST'])
+@limiter.limit("5 per second")
 def make_guess():
     data = request.get_json()
     user_guess = data.get('guess')

@@ -9,3 +9,6 @@ gunicorn
 Flask-SocketIO==5.5.0
 gevent
 gevent-websocket
+redis
+Flask-Limiter
+python-dotenv
