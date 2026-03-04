@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SuperGuess | Multiplayer Setup</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      .avatar-selector {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 20px 0;
+        gap: 15px;
+      }
+      .avatar-img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 2px solid var(--neon-blue);
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .arrow-btn {
+        background: none;
+        border: none;
+        color: var(--neon-blue);
+        font-size: 2rem;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+      .arrow-btn:hover {
+        transform: scale(1.2);
+        color: var(--neon-pink);
+      }
+    </style>
+  </head>
+  <body>
+    <button
+      id="theme-btn"
+      onclick="toggleTheme()"
+      class="btn btn-secondary"
+      style="
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: auto;
+        font-size: 0.8rem;
+        z-index: 10;
+      "
+    >
+      🕹️ MODE: ARCADE
+    </button>
+
+    <div class="container fade-in">
+      <div class="glass-card">
+        <h1 class="logo" style="font-size: 2rem">
+          VERSUS <span class="highlight">MODE</span>
+        </h1>
+        <p class="subtitle">Challenge a friend in real-time!</p>
+
+        <form
+          action="{{ url_for('main.multiplayer_create') }}"
+          method="POST"
+          id="setupForm"
+        >
+          <div class="avatar-selector">
+            <button type="button" class="arrow-btn" id="prevAvatar">◄</button>
+            <img id="avatarPreview" class="avatar-img" src="" alt="Avatar" />
+            <button type="button" class="arrow-btn" id="nextAvatar">►</button>
+          </div>
+          <!-- Hidden input to store chosen avatar URL -->
+          <input type="hidden" name="avatar" id="avatarInput" value="" />
+
+          <div class="difficulty-selector" style="margin-bottom: 15px">
+            <label>CODENAME</label>
+            <input
+              type="text"
+              name="username"
+              id="usernameInput"
+              class="neon-input"
+              placeholder="e.g. Agent 47"
+              required
+              maxlength="15"
+              autocomplete="off"
+              style="
+                text-align: center;
+                font-family: &quot;Orbitron&quot;;
+                font-size: 1.2rem;
+                width: 100%;
+              "
+            />
+          </div>
+
+          <div class="difficulty-selector" id="difficultyContainer">
+            <label for="difficulty">SELECT CLEARANCE LEVEL</label>
+            <select name="difficulty" id="difficulty" class="neon-input">
+              <option value="easy">LEVEL 1: ROOKIE (1-50)</option>
+              <option value="medium">LEVEL 2: AGENT (1-200)</option>
+              <option value="hard">LEVEL 3: GRANDMASTER (1-1000)</option>
+              <option value="chaos" style="color: #ff4757; font-weight: bold">
+                ⚠️ LEVEL 4: CHAOS (1-100)
+              </option>
+            </select>
+          </div>
+
+          <div class="menu-buttons" style="margin-top: 20px">
+            <button
+              type="button"
+              id="startBtn"
+              class="btn btn-primary glitch-effect"
+            >
+              CREATE ROOM
+            </button>
+            <a
+              href="{{ url_for('main.index') }}"
+              class="btn btn-secondary"
+              style="display: block; text-decoration: none; text-align: center"
+              >ABORT MISSION</a
+            >
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+      // Dicebear avatar logic
+      const styles = [
+        "bottts",
+        "adventurer",
+        "avataaars",
+        "identicon",
+        "micah",
+      ];
+      let currentSeed = Math.random().toString(36).substring(7);
+      let currentStyleIndex = 0;
+
+      function updateAvatar() {
+        const style = styles[currentStyleIndex];
+        const url = `https://api.dicebear.com/7.x/${style}/svg?seed=${currentSeed}&backgroundColor=transparent`;
+        document.getElementById("avatarPreview").src = url;
+        document.getElementById("avatarInput").value = url;
+        // Also save to localStorage for the next screen
+        localStorage.setItem("mp_avatar", url);
+        localStorage.setItem(
+          "mp_username",
+          document.getElementById("usernameInput").value,
+        );
+      }
+
+      document.getElementById("prevAvatar").addEventListener("click", () => {
+        currentSeed = Math.random().toString(36).substring(7);
+        currentStyleIndex =
+          (currentStyleIndex - 1 + styles.length) % styles.length;
+        updateAvatar();
+      });
+
+      document.getElementById("nextAvatar").addEventListener("click", () => {
+        currentSeed = Math.random().toString(36).substring(7);
+        currentStyleIndex = (currentStyleIndex + 1) % styles.length;
+        updateAvatar();
+      });
+
+      document
+        .getElementById("usernameInput")
+        .addEventListener("input", (e) => {
+          localStorage.setItem("mp_username", e.target.value);
+        });
+
+      // Initialize
+      updateAvatar();
+
+      // If joining via link, the URL will have ?join=1, hide difficulty
+      const urlParams = new URLSearchParams(window.location.search);
+      const roomId = urlParams.get("room");
+
+      if (roomId) {
+        document.getElementById("difficultyContainer").style.display = "none";
+        document.getElementById("startBtn").textContent = "JOIN ROOM";
+        document.getElementById("startBtn").addEventListener("click", () => {
+          if (!document.getElementById("usernameInput").value) {
+            alert("Please enter a Codename!");
+            return;
+          }
+          window.location.href = `/room/${roomId}`;
+        });
+      } else {
+        document.getElementById("startBtn").addEventListener("click", () => {
+          if (!document.getElementById("usernameInput").value) {
+            alert("Please enter a Codename!");
+            return;
+          }
+          document.getElementById("setupForm").submit();
+        });
+      }
+    </script>
+  </body>
+</html>

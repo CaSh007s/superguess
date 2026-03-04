@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SuperGuess | Versus Room</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+      .vs-container {
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+        gap: 20px;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .player-panel {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--border-color);
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        backdrop-filter: blur(10px);
+        transition:
+          box-shadow 0.3s,
+          border-color 0.3s;
+      }
+
+      .player-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 3px solid var(--border-color);
+        margin-bottom: 15px;
+        background: rgba(255, 255, 255, 0.05);
+        transition: all 0.3s;
+      }
+
+      .player-name {
+        font-family: "Orbitron", sans-serif;
+        color: var(--text-color);
+        font-size: 1.2rem;
+        margin-bottom: 5px;
+      }
+
+      .player-score {
+        font-size: 0.9rem;
+        color: var(--neon-pink);
+      }
+
+      .player-status {
+        margin-top: 10px;
+        font-size: 0.8rem;
+        padding: 5px 10px;
+        border-radius: 20px;
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+      }
+
+      .center-board {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      /* The proximity colors */
+      .color-bg-primary {
+        border-color: var(--neon-blue);
+        box-shadow: 0 0 10px var(--neon-blue);
+      }
+      .color-bg-very-hot {
+        border-color: #ff0000;
+        box-shadow: 0 0 20px #ff0000;
+      }
+      .color-bg-hot {
+        border-color: #ff4757;
+        box-shadow: 0 0 15px #ff4757;
+      }
+      .color-bg-warm {
+        border-color: #ffa502;
+        box-shadow: 0 0 10px #ffa502;
+      }
+      .color-bg-cool {
+        border-color: #eccc68;
+        box-shadow: 0 0 10px #eccc68;
+      }
+      .color-bg-cold {
+        border-color: #1e90ff;
+        box-shadow: 0 0 10px #1e90ff;
+      }
+      .color-bg-very-cold {
+        border-color: #a29bfe;
+        box-shadow: 0 0 10px #a29bfe;
+      }
+
+      /* Chat Panel */
+      .chat-panel {
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid var(--border-color);
+        border-radius: 15px;
+        display: flex;
+        flex-direction: column;
+        height: 400px;
+        overflow: hidden;
+      }
+
+      .chat-messages {
+        flex: 1;
+        padding: 10px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        font-size: 0.85rem;
+      }
+
+      .chat-message {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 5px 10px;
+        border-radius: 8px;
+        word-break: break-all;
+      }
+
+      .chat-message.system {
+        color: var(--neon-blue);
+        font-style: italic;
+        background: none;
+        text-align: center;
+      }
+
+      .chat-input-area {
+        display: flex;
+        padding: 10px;
+        border-top: 1px solid var(--border-color);
+        background: rgba(0, 0, 0, 0.8);
+      }
+
+      .chat-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: var(--text-color);
+        outline: none;
+        font-family: "Poppins", sans-serif;
+      }
+
+      .chat-btn {
+        background: none;
+        border: none;
+        color: var(--neon-pink);
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      /* Mobile handling */
+      @media (max-width: 900px) {
+        .vs-container {
+          grid-template-columns: 1fr;
+        }
+        .player-panel {
+          flex-direction: row;
+          justify-content: space-around;
+          padding: 10px;
+        }
+        .player-avatar {
+          width: 60px;
+          height: 60px;
+          margin: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <button
+      id="theme-btn"
+      onclick="toggleTheme()"
+      class="btn btn-secondary"
+      style="
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: auto;
+        font-size: 0.8rem;
+        z-index: 10;
+      "
+    >
+      🕹️ MODE: ARCADE
+    </button>
+
+    <div class="vs-container fade-in">
+      <!-- PLAYER 1 (YOU) -->
+      <div class="player-panel" id="mePanel">
+        <img
+          id="myAvatar"
+          class="player-avatar color-bg-primary"
+          src=""
+          alt="Me"
+        />
+        <div>
+          <div class="player-name" id="myName">Connecting...</div>
+          <div class="player-score" id="myScore">Wins: 0</div>
+          <div class="player-status" id="myStatus">WAITING</div>
+        </div>
+      </div>
+
+      <!-- CENTER BOARD -->
+      <div class="center-board">
+        <div class="glass-card" style="width: 100%; padding: 20px">
+          <h2
+            style="
+              font-family: &quot;Orbitron&quot;;
+              margin-top: 0;
+              color: var(--neon-blue);
+            "
+            id="roomTitle"
+          >
+            ROOM: {{ room_id }}
+          </h2>
+
+          <div id="lobbyView">
+            <p>Invite a friend to join this room.</p>
+            <input
+              type="text"
+              readonly
+              id="inviteLink"
+              class="neon-input"
+              style="
+                width: 100%;
+                font-size: 0.8rem;
+                text-align: center;
+                margin-bottom: 10px;
+              "
+              value=""
+            />
+            <button
+              class="btn btn-secondary"
+              onclick="copyInvite()"
+              style="font-size: 0.8rem"
+            >
+              COPY LINK
+            </button>
+
+            <hr
+              style="border-color: rgba(255, 255, 255, 0.1); margin: 20px 0"
+            />
+
+            <button
+              id="readyBtn"
+              class="btn btn-primary glitch-effect"
+              style="display: none"
+              onclick="markReady()"
+            >
+              I'M READY
+            </button>
+            <p
+              id="waitingText"
+              style="color: var(--neon-pink); font-size: 0.9rem"
+            ></p>
+          </div>
+
+          <div id="gameView" style="display: none">
+            <div class="stats-bar" style="justify-content: center; gap: 20px">
+              <span class="stat-badge">LEVEL: {{ difficulty|upper }}</span>
+              <span class="stat-badge"
+                >RANGE: 1-<span id="rangeTop">{{ range_top }}</span></span
+              >
+            </div>
+
+            <div class="feedback-box display-default" id="feedback">
+              <h3>Match Started!</h3>
+              <p>First to guess the number wins.</p>
+            </div>
+
+            <div class="proximity-bar-container">
+              <div
+                class="proximity-bar"
+                id="proximityBar"
+                style="width: 0%; background: var(--border-color)"
+              ></div>
+            </div>
+
+            <input
+              type="number"
+              id="guessInput"
+              class="neon-input guess-input"
+              placeholder="???"
+              min="1"
+              autocomplete="off"
+              onkeypress="handleEnter(event)"
+            />
+
+            <button
+              class="btn btn-primary glitch-effect btn-guess"
+              onclick="submitGuess()"
+              id="guessBtn"
+            >
+              SUBMIT GUESS
+            </button>
+
+            <button
+              class="btn btn-secondary"
+              id="rematchBtn"
+              style="display: none; margin-top: 15px; width: 100%"
+              onclick="markReady()"
+            >
+              PLAY AGAIN
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLAYER 2 (OPPONENT) & CHAT -->
+      <div style="display: flex; flex-direction: column; gap: 20px">
+        <div class="player-panel" id="oppPanel" style="opacity: 0.5">
+          <img
+            id="oppAvatar"
+            class="player-avatar color-bg-primary"
+            src="https://api.dicebear.com/7.x/bottts/svg?seed=waiting"
+            alt="Opponent"
+          />
+          <div>
+            <div class="player-name" id="oppName">Waiting for P2...</div>
+            <div class="player-score" id="oppScore">Wins: 0</div>
+            <div class="player-status" id="oppStatus">---</div>
+          </div>
+        </div>
+
+        <div class="chat-panel">
+          <div class="chat-messages" id="chatBox">
+            <div class="chat-message system">
+              Welcome to the Room. Address etiquette is monitored.
+            </div>
+          </div>
+          <div class="chat-input-area">
+            <input
+              type="text"
+              id="chatInput"
+              class="chat-input"
+              placeholder="Type a message..."
+              maxlength="100"
+              onkeypress="handleChatEnter(event)"
+            />
+            <button class="chat-btn" onclick="sendChat()">SEND</button>
+          </div>
+          <!-- Quick Emotes -->
+          <div
+            style="
+              display: flex;
+              gap: 5px;
+              padding: 5px 10px;
+              background: rgba(0, 0, 0, 0.6);
+              overflow-x: auto;
+            "
+          >
+            <span style="cursor: pointer" onclick="sendQuickChat('gg')"
+              >🎉GG</span
+            >
+            <span style="cursor: pointer" onclick="sendQuickChat('gl')"
+              >🍀GL</span
+            >
+            <span style="cursor: pointer" onclick="sendQuickChat('close')"
+              >🥵Close!</span
+            >
+            <span style="cursor: pointer" onclick="sendQuickChat('wow')"
+              >🤯Wow</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const ROOM_ID = "{{ room_id }}";
+    </script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/multiplayer.js') }}"></script>
+  </body>
+</html>

@@ -3,9 +3,42 @@ from app.engine.game import GameSession
 import time
 import json
 import os
+import uuid
 from flask import current_app
+from app.engine.multiplayer import rooms, get_range_top
 
 main = Blueprint('main', __name__)
+
+@main.route('/multiplayer/setup')
+def multiplayer_setup():
+    return render_template('multiplayer_setup.html')
+
+@main.route('/multiplayer/create', methods=['POST'])
+def multiplayer_create():
+    difficulty = request.form.get('difficulty', 'easy')
+    room_id = str(uuid.uuid4())[:8] # Short UUID
+    
+    # Initialize room in memory
+    rooms[room_id] = {
+        'id': room_id,
+        'difficulty': difficulty,
+        'range_top': get_range_top(difficulty),
+        'secret_number': None,
+        'players': {},
+        'status': 'waiting',
+        'start_time': None
+    }
+    
+    return redirect(url_for('main.multiplayer_room', room_id=room_id))
+
+@main.route('/room/<room_id>')
+def multiplayer_room(room_id):
+    if room_id not in rooms:
+        return "Room not found or has expired.", 404
+        
+    room = rooms[room_id]
+    return render_template('multiplayer_room.html', room_id=room_id, difficulty=room['difficulty'], range_top=room['range_top'])
+
 
 @main.route('/')
 def index():
@@ -56,6 +89,10 @@ def make_guess():
 
     if not user_guess:
         return jsonify({"status": "error", "message": "No guess provided"})
+
+    # --- SESSION GUARD ---
+    if 'secret_number' not in session:
+        return jsonify({"status": "error", "message": "No active game session found. Please refresh."})
 
     # 1. RECONSTRUCT STATE
     game = GameSession(session['difficulty'], unlimited=session.get('unlimited', False))
@@ -119,7 +156,7 @@ def result_page():
 def buy_hint():
     # 1. Reconstruct State
     if 'secret_number' not in session:
-        return jsonify({"status": "error", "message": "No active game"})
+        return jsonify({"status": "error", "message": "No active game session found. Please refresh."})
 
     game = GameSession(session['difficulty'])
     game.secret_number = session['secret_number']
