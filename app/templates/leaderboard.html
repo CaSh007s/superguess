@@ -1,51 +1,105 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Hall of Fame</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-</head>
-<body>
-
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
     <div class="container fade-in">
-        <div class="glass-card" style="max-width: 600px;">
-            <h1 class="logo">HALL OF <span class="highlight">FAME</span></h1>
-            
-            <div class="leaderboard-container" style="margin: 2rem 0;">
-                <table class="neon-table">
-                    <thead>
-                        <tr>
-                            <th>MISSION</th>
-                            <th>TOP SCORE</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>ROOKIE (EASY)</td>
-                            <td class="score-val">{{ scores.get('easy', 0) }}</td>
-                        </tr>
-                        <tr>
-                            <td>AGENT (MED)</td>
-                            <td class="score-val">{{ scores.get('medium', 0) }}</td>
-                        </tr>
-                        <tr>
-                            <td>GRANDMASTER (HARD)</td>
-                            <td class="score-val">{{ scores.get('hard', 0) }}</td>
-                        </tr>
-                        <tr>
-                            <td style="color: #ff4757;">⚠️ CHAOS MODE</td>
-                            <td class="score-val highlight">{{ scores.get('chaos', 0) }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+      <div class="glass-card" style="max-width: 600px">
+        <h1 class="logo">HALL OF <span class="highlight">FAME</span></h1>
 
-            <div class="menu-buttons">
-                <a href="{{ url_for('main.index') }}" class="btn btn-secondary">BACK TO MENU</a>
-            </div>
+        <div class="leaderboard-container" style="margin: 2rem 0">
+          <table class="neon-table">
+            <thead>
+              <tr>
+                <th>MISSION</th>
+                <th>TOP SCORE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>ROOKIE (EASY)</td>
+                <td class="score-val" id="score-easy">0</td>
+              </tr>
+              <tr>
+                <td>AGENT (MED)</td>
+                <td class="score-val" id="score-medium">0</td>
+              </tr>
+              <tr>
+                <td>GRANDMASTER (HARD)</td>
+                <td class="score-val" id="score-hard">0</td>
+              </tr>
+              <tr>
+                <td style="color: #ff4757">⚠️ CHAOS MODE</td>
+                <td class="score-val highlight" id="score-chaos">0</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+
+        <div
+          class="menu-buttons"
+          style="display: flex; gap: 15px; justify-content: center"
+        >
+          <button
+            onclick="clearScores()"
+            class="btn btn-secondary"
+            style="border-color: #ff4757; color: #ff4757; margin-bottom: 0"
+          >
+            CLEAR SCORES
+          </button>
+          <a
+            href="{{ url_for('main.index') }}"
+            class="btn btn-secondary"
+            style="margin-bottom: 0"
+            >BACK TO MENU</a
+          >
+        </div>
+      </div>
     </div>
 
-</body>
+    <!-- Include script.js so the theme initialization runs -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        loadScores();
+      });
+
+      function loadScores() {
+        let scoresData = localStorage.getItem("sg_highscores");
+        let highscores = scoresData
+          ? JSON.parse(scoresData)
+          : { easy: 0, medium: 0, hard: 0, chaos: 0 };
+
+        document.getElementById("score-easy").textContent =
+          highscores["easy"] || 0;
+        document.getElementById("score-medium").textContent =
+          highscores["medium"] || 0;
+        document.getElementById("score-hard").textContent =
+          highscores["hard"] || 0;
+        document.getElementById("score-chaos").textContent =
+          highscores["chaos"] || 0;
+      }
+
+      function clearScores() {
+        if (
+          confirm(
+            "Are you sure you want to clear your local Hall of Fame? This cannot be undone.",
+          )
+        ) {
+          localStorage.removeItem("sg_highscores");
+          loadScores();
+        }
+      }
+    </script>
+  </body>
 </html>

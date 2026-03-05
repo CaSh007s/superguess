@@ -1,47 +1,82 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Mission Report</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-</head>
-<body>
-
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
     <div class="container fade-in">
-        <div class="glass-card">
-            
-            <!-- DYNAMIC HEADER -->
-            {% if score > 0 %}
-                <h1 class="logo" style="color: #2ed573; text-shadow: 0 0 15px #2ed573;">MISSION ACCOMPLISHED</h1>
-            {% else %}
-                <h1 class="logo" style="color: #ff4757; text-shadow: 0 0 15px #ff4757;">MISSION FAILED</h1>
-            {% endif %}
+      <div class="glass-card">
+        <!-- DYNAMIC HEADER -->
+        {% if score > 0 %}
+        <h1 class="logo" style="color: #2ed573; text-shadow: 0 0 15px #2ed573">
+          MISSION ACCOMPLISHED
+        </h1>
+        {% else %}
+        <h1 class="logo" style="color: #ff4757; text-shadow: 0 0 15px #ff4757">
+          MISSION FAILED
+        </h1>
+        {% endif %}
 
-            <!-- SCORE CARD -->
-            <div class="score-board">
-                <div class="score-item">
-                    <p class="subtitle">FINAL SCORE</p>
-                    <h2 class="giant-text">{{ score }}</h2>
-                </div>
-                
-                <div class="score-item">
-                    <p class="subtitle">BEST ({{ difficulty|upper }})</p>
-                    <h2 class="highlight">{{ highscore }}</h2>
-                </div>
-            </div>
+        <!-- SCORE CARD -->
+        <div class="score-board">
+          <div class="score-item">
+            <p class="subtitle">FINAL SCORE</p>
+            <h2 class="giant-text" id="finalScore">{{ score }}</h2>
+          </div>
 
-            {% if is_new_record %}
-            <div class="new-record-alert">
-                🚨 NEW HIGH SCORE DETECTED 🚨
-            </div>
-            {% endif %}
-
-            <div class="menu-buttons" style="margin-top: 2rem;">
-                <a href="{{ url_for('main.index') }}" class="btn btn-primary">RETURN TO BASE</a>
-            </div>
+          <div class="score-item">
+            <p class="subtitle">BEST ({{ difficulty|upper }})</p>
+            <h2 class="highlight" id="bestScore">0</h2>
+          </div>
         </div>
+
+        <div id="newRecordAlert" class="new-record-alert" style="display: none">
+          🚨 NEW HIGH SCORE DETECTED 🚨
+        </div>
+
+        <div class="menu-buttons" style="margin-top: 2rem">
+          <a href="{{ url_for('main.index') }}" class="btn btn-primary"
+            >RETURN TO BASE</a
+          >
+        </div>
+      </div>
     </div>
 
-</body>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const currentScore = parseInt("{{ score }}") || 0;
+        const difficulty = "{{ difficulty }}";
+        const isUnlimited = "{{ unlimited }}" === "True";
+
+        // Load and initialize highscores
+        let scoresData = localStorage.getItem("sg_highscores");
+        let highscores = scoresData
+          ? JSON.parse(scoresData)
+          : { easy: 0, medium: 0, hard: 0, chaos: 0 };
+
+        let bestScore = highscores[difficulty] || 0;
+
+        // Unlimted mode doesn't count towards highscores
+        if (!isUnlimited && currentScore > bestScore) {
+          bestScore = currentScore;
+          highscores[difficulty] = bestScore;
+          localStorage.setItem("sg_highscores", JSON.stringify(highscores));
+
+          document.getElementById("newRecordAlert").style.display = "block";
+        }
+
+        document.getElementById("bestScore").textContent = bestScore;
+      });
+    </script>
+  </body>
 </html>

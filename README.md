@@ -2,8 +2,12 @@
   
 # 🔮 SuperGuess: The Ultimate Arcade Challenge
 
+<img src="screenshots/desktop-stealth.png" alt="SuperGuess Stealth Mode" width="800">
+
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white)
 ![Flask](https://img.shields.io/badge/Flask-Framework-white?style=for-the-badge&logo=flask&logoColor=black)
+![Redis](https://img.shields.io/badge/Redis-Upstash-red?style=for-the-badge&logo=redis&logoColor=white)
+![Socket.IO](https://img.shields.io/badge/Socket.IO-Realtime-black?style=for-the-badge&logo=socket.io&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Deployed-purple?style=for-the-badge)
 
@@ -75,17 +79,17 @@ The game features a sophisticated feedback engine that guides players using colo
 
 ## 📸 Screenshots
 
-|                           **Arcade Theme**                            |                              **Stealth Theme**                              |
+|                           **Arcade Theme**                            |                          **How To Play (Stealth)**                          |
 | :-------------------------------------------------------------------: | :-------------------------------------------------------------------------: |
-| <img src="screenshots/hero_arcade.png" alt="Arcade Mode" width="400"> | <img src="screenshots/gameplay_stealth.png" alt="Stealth Mode" width="400"> |
+| <img src="screenshots/hero_arcade.png" alt="Arcade Mode" width="400"> | <img src="screenshots/howtoplay-stealth.png" alt="How to Play" width="400"> |
 
 |                              **Mobile View**                              |                           **Chaos Mode**                            |
 | :-----------------------------------------------------------------------: | :-----------------------------------------------------------------: |
 | <img src="screenshots/mobile_responsive.png" alt="Mobile UI" width="400"> | <img src="screenshots/chaos_mode.png" alt="Chaos Mode" width="400"> |
 
-|                         **PvP Gameplay (Desktop)**                         |                       **PvP Battle Chat (Mobile)**                       |
-| :------------------------------------------------------------------------: | :----------------------------------------------------------------------: |
-| <img src="screenshots/pvp_desktop.png" alt="PvP Mode Desktop" width="400"> | <img src="screenshots/pvp_mobile.png" alt="PvP Mode Mobile" width="400"> |
+|                         **PvP Gameplay (Desktop)**                         |                         **PvP Battle Chat (Mobile)**                         |
+| :------------------------------------------------------------------------: | :--------------------------------------------------------------------------: |
+| <img src="screenshots/pvp-desktop.png" alt="PvP Mode Desktop" width="400"> | <img src="screenshots/pvpchat-mobile.png" alt="PvP Mode Mobile" width="400"> |
 
 ---
 
@@ -136,11 +140,21 @@ Got an idea for **Level 5**? Pull requests are welcome!
 
 ## 👨‍💻 Author
 
-**[Kalash Pratap Gaur]**
+**Kalash Pratap Gaur**
 
-- GitHub: [@CaSh007s](https://github.com/CaSh007s)
-<!-- * Portfolio: [YourPortfolioLink](https://yourportfolio.com) -->
+<ul style="list-style-type: none; padding-left: 0; margin-left: 20px;">
+  <li style="display: flex; align-items: center; margin-bottom: 5px;">
+    <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: #fff; margin-right: 15px;"></span>
+    GitHub: <a href="https://github.com/CaSh007s">@CaSh007s</a>
+  </li>
+  <!-- <li style="display: flex; align-items: center;"> -->
+    <!-- <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: #fff; margin-right: 15px;"></span> -->
+    <!-- Portfolio: <a href="https://yourportfolio.com">YourPortfolioLink</a> -->
+  <!-- </li> -->
+</ul>
 
 ---
 
-> Built with 💻 and ☕ by [Kalash].
+<blockquote style="border-left: 4px solid var(--border-color); padding-left: 15px; margin-left: 0; font-style: italic; color: #a0a0a0;">
+  Built with 💻 and ☕ by Kalash.
+</blockquote>

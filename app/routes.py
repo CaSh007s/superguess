@@ -130,31 +130,12 @@ def make_guess():
 def result_page():
     score = session.get('score', 0)
     difficulty = session.get('difficulty', 'easy')
-    
-    json_path = os.path.join(current_app.root_path, 'highscores.json')
-    
-    try:
-        with open(json_path, 'r') as f:
-            highscores = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        highscores = {"easy": 0, "medium": 0, "hard": 0}
-
-    is_new_record = False
-    
-    # CHANGE: Only save high score if this was a Normal (Limited) game
-    if not session.get('unlimited'):
-        # Only save if they actually beat the score
-        if score > highscores.get(difficulty, 0):
-            highscores[difficulty] = score
-            is_new_record = True
-            with open(json_path, 'w') as f:
-                json.dump(highscores, f)
+    unlimited = session.get('unlimited', False)
 
     return render_template('result.html', 
                            score=score, 
-                           highscore=highscores.get(difficulty, 0),
-                           is_new_record=is_new_record,
-                           difficulty=difficulty)
+                           difficulty=difficulty,
+                           unlimited=unlimited)
 
 @main.route('/hint', methods=['POST'])
 def buy_hint():
@@ -182,15 +163,4 @@ def buy_hint():
 
 @main.route('/leaderboard')
 def leaderboard():
-    json_path = os.path.join(current_app.root_path, 'highscores.json')
-    
-    default_scores = {"easy": 0, "medium": 0, "hard": 0, "chaos": 0}
-
-    try:
-        with open(json_path, 'r') as f:
-            saved_scores = json.load(f)
-            highscores = {**default_scores, **saved_scores}
-    except (FileNotFoundError, json.JSONDecodeError):
-        highscores = default_scores
-
-    return render_template('leaderboard.html', scores=highscores)
+    return render_template('leaderboard.html')
