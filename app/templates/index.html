@@ -118,13 +118,13 @@
 
     <!-- HOW TO PLAY SPLASH SCREEN (MODAL) -->
     <div id="rulesModal" class="modal-overlay">
-      <div class="modal-content glass-card" style="max-width: 700px">
+      <div class="modal-content glass-card" style="max-width: 900px">
         <span class="close-btn" onclick="closeRules()">&times;</span>
         <h2 style="color: var(--neon-blue); margin-top: 0">
           MISSION PROTOCOLS
         </h2>
 
-        <div class="rules-grid">
+        <div class="rules-grid" style="grid-template-columns: 1fr 1fr 1fr">
           <!-- COLUMN 1: BASICS -->
           <div class="rule-column">
             <h3 class="rule-title">🎯 THE OBJECTIVE</h3>
@@ -179,6 +179,30 @@
               <li>
                 <strong>Unlimited Mode:</strong> Score Halved. No High Score
                 entry.
+              </li>
+            </ul>
+          </div>
+
+          <!-- COLUMN 3: MULTIPLAYER -->
+          <div class="rule-column">
+            <h3 class="rule-title">🆚 MULTIPLAYER DUELS</h3>
+            <p>Challenge a friend in real-time PvP combat!</p>
+            <ul class="stats-list" style="text-align: left">
+              <li>
+                <strong>No Accounts:</strong> Generate a quick avatar and play
+                instantly.
+              </li>
+              <li>
+                <strong>Live Radar:</strong> Watch your opponent's proximity bar
+                fill up in real time as they guess.
+              </li>
+              <li>
+                <strong>Stealth Comm:</strong> Taunt your opponent using the
+                built-in battle chat and emoji macros.
+              </li>
+              <li>
+                <strong>Abandoned Rooms:</strong> Rooms self-destruct after 15
+                minutes of inactivity.
               </li>
             </ul>
           </div>

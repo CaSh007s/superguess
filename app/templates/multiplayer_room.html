@@ -284,14 +284,66 @@
         background: rgba(255, 255, 255, 0.1);
       }
 
+      .floating-chat-btn {
+        display: none;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--neon-pink);
+        color: white;
+        font-size: 1.5rem;
+        border: none;
+        box-shadow: 0 4px 15px rgba(188, 19, 254, 0.6);
+        cursor: pointer;
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+        transition:
+          transform 0.2s,
+          background 0.2s;
+      }
+      .floating-chat-btn:hover {
+        transform: scale(1.1);
+        background: var(--neon-blue);
+      }
+      .chat-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: red;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 0.7rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Poppins", sans-serif;
+        font-weight: bold;
+      }
+      .chat-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(5px);
+        z-index: 999;
+      }
+
       /* Mobile handling */
       @media (max-width: 900px) {
         .vs-container {
           grid-template-columns: 1fr 1fr;
           grid-template-areas:
             "p1 p2"
-            "center center"
-            "chat chat";
+            "center center";
           gap: 15px;
           padding: 10px;
         }
@@ -312,23 +364,48 @@
           margin-bottom: 10px;
         }
 
-        /* -- Bolder Mobile Chat -- */
+        .floating-chat-btn {
+          display: flex;
+        }
+
+        /* -- Floating Mobile Chat -- */
         .chat-panel {
-          background: var(
-            --glass-bg,
-            rgba(20, 20, 20, 0.8)
-          ); /* Solidifies background */
-          border: 2px solid var(--neon-blue); /* Theme-aware bright border */
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9); /* Deep separation shadow */
+          display: none; /* Hidden by default on mobile */
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 90%;
+          max-width: 400px;
+          height: 60vh;
+          z-index: 1000;
+          background: var(--glass-bg, rgba(20, 20, 20, 0.95));
+          border: 2px solid var(--neon-blue);
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
           border-radius: 20px;
-          height: 380px; /* Adjust height for mobile viewport */
+        }
+
+        .chat-panel.open-mobile {
+          display: flex;
+          animation: popIn 0.3s ease-out forwards;
+        }
+
+        @keyframes popIn {
+          0% {
+            opacity: 0;
+            transform: translate(-50%, -45%) scale(0.9);
+          }
+          100% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+          }
         }
 
         .chat-input-area {
           background: rgba(0, 0, 0, 0.9);
           padding: 12px;
-          border-bottom-left-radius: 20px;
-          border-bottom-right-radius: 20px;
+          border-bottom-left-radius: 18px;
+          border-bottom-right-radius: 18px;
         }
 
         .chat-btn {
@@ -499,7 +576,7 @@
           </div>
         </div>
 
-        <div class="chat-panel">
+        <div class="chat-panel" id="chatPanel">
           <div class="chat-messages" id="chatBox">
             <div class="chat-message system">
               Welcome to the Room.<br />Address etiquette is monitored.
@@ -535,6 +612,21 @@
         </div>
       </div>
     </div>
+
+    <!-- Mobile Chat Elements -->
+    <div
+      id="chatOverlay"
+      class="chat-overlay"
+      onclick="toggleMobileChat()"
+    ></div>
+    <button
+      id="floatingChatBtn"
+      class="floating-chat-btn"
+      onclick="toggleMobileChat()"
+    >
+      💬
+      <span id="chatBadge" class="chat-badge" style="display: none">0</span>
+    </button>
 
     <script>
       const ROOM_ID = "{{ room_id }}";

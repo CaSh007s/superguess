@@ -2,6 +2,23 @@ const socket = io();
 
 let mySid = null;
 let isPlaying = false;
+let unreadCount = 0;
+let isChatOpen = window.innerWidth > 900;
+
+// Listen for window resize to adjust chat state
+window.addEventListener("resize", () => {
+  if (window.innerWidth > 900) {
+    isChatOpen = true; // Always open on desktop
+    document.getElementById("chatPanel").classList.remove("open-mobile");
+    document.getElementById("chatOverlay").style.display = "none";
+    document.getElementById("chatBadge").style.display = "none";
+    unreadCount = 0;
+  } else if (
+    !document.getElementById("chatPanel").classList.contains("open-mobile")
+  ) {
+    isChatOpen = false;
+  }
+});
 
 // Initialize joining
 document.addEventListener("DOMContentLoaded", () => {
@@ -146,6 +163,8 @@ socket.on("chat_broadcast", (data) => {
   div.innerHTML = `<strong style="color:var(--neon-pink)">${data.sender}:</strong> ${data.message}`;
   chatBox.appendChild(div);
   chatBox.scrollTop = chatBox.scrollHeight;
+
+  checkUnread();
 });
 
 // Core Functions
@@ -267,4 +286,39 @@ function addSystemChat(msg) {
   div.textContent = msg;
   chatBox.appendChild(div);
   chatBox.scrollTop = chatBox.scrollHeight;
+  checkUnread();
+}
+
+function checkUnread() {
+  if (!isChatOpen && window.innerWidth <= 900) {
+    unreadCount++;
+    const badge = document.getElementById("chatBadge");
+    badge.textContent = unreadCount;
+    badge.style.display = "flex";
+  }
+}
+
+function toggleMobileChat() {
+  const panel = document.getElementById("chatPanel");
+  const overlay = document.getElementById("chatOverlay");
+
+  if (panel.classList.contains("open-mobile")) {
+    // Close it
+    panel.classList.remove("open-mobile");
+    overlay.style.display = "none";
+    isChatOpen = false;
+  } else {
+    // Open it
+    panel.classList.add("open-mobile");
+    overlay.style.display = "block";
+    isChatOpen = true;
+
+    // Clear unread
+    unreadCount = 0;
+    document.getElementById("chatBadge").style.display = "none";
+
+    // Scroll to bottom
+    const chatBox = document.getElementById("chatBox");
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
 }
