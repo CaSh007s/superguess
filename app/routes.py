@@ -5,7 +5,7 @@ import json
 import os
 import uuid
 from flask import current_app
-from app.engine.multiplayer import rooms, get_range_top
+from app.engine.multiplayer import get_room, save_room, room_exists, get_range_top
 from app import limiter
 
 main = Blueprint('main', __name__)
@@ -20,8 +20,8 @@ def multiplayer_create():
     difficulty = request.form.get('difficulty', 'easy')
     room_id = str(uuid.uuid4())[:8] # Short UUID
     
-    # Initialize room in memory
-    rooms[room_id] = {
+    # Initialize room in Redis (or memory fallback)
+    room_data = {
         'id': room_id,
         'difficulty': difficulty,
         'range_top': get_range_top(difficulty),
@@ -30,15 +30,16 @@ def multiplayer_create():
         'status': 'waiting',
         'start_time': None
     }
+    save_room(room_id, room_data)
     
     return redirect(url_for('main.multiplayer_room', room_id=room_id))
 
 @main.route('/room/<room_id>')
 def multiplayer_room(room_id):
-    if room_id not in rooms:
+    room = get_room(room_id)
+    if not room:
         return "Room not found or has expired.", 404
         
-    room = rooms[room_id]
     return render_template('multiplayer_room.html', room_id=room_id, difficulty=room['difficulty'], range_top=room['range_top'])
 
 
