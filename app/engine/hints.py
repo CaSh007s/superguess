@@ -37,8 +37,11 @@ def generate_hint(number, range_top):
     options.append(f"The sum of the digits is {digit_sum}.")
 
     # 5. Range Slicing (Greater/Less than midpoints)
-    # We pick a random checkpoint to help them narrow it down
+    # Pick a random checkpoint, ensuring it's never the exact number to prevent false < / > hints
     checkpoint = random.randint(1, range_top)
+    while checkpoint == number:
+        checkpoint = random.randint(1, range_top)
+        
     if number > checkpoint:
         options.append(f"The number is greater than {checkpoint}.")
     else:
