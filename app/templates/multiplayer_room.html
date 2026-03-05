@@ -195,18 +195,48 @@
       }
 
       .chat-message {
-        background: rgba(255, 255, 255, 0.05);
         padding: 8px 12px;
         border-radius: 12px;
-        word-break: break-word; /* Fixed word-wrapping breaking etiquette */
+        word-break: break-word;
         transition:
           transform 0.2s,
           background 0.2s;
+        max-width: 85%;
+        margin-bottom: 5px;
+        display: inline-block;
+      }
+
+      /* Sent by Me */
+      .chat-message.self {
+        align-self: flex-end;
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .chat-message.self.arcade {
+        border-bottom-right-radius: 2px;
+        border-right: 2px solid var(--neon-pink);
+      }
+      .chat-message.self.stealth {
+        border-bottom-right-radius: 2px;
+        border-right: 2px solid var(--neon-blue);
+      }
+
+      /* Sent by Opponent */
+      .chat-message.opponent {
+        align-self: flex-start;
+        background: rgba(0, 0, 0, 0.4);
+      }
+      .chat-message.opponent.arcade {
+        border-bottom-left-radius: 2px;
+        border-left: 2px solid rgba(255, 255, 255, 0.2);
+      }
+      .chat-message.opponent.stealth {
+        border-bottom-left-radius: 2px;
+        border-left: 2px solid rgba(255, 255, 255, 0.1);
       }
 
       .chat-message:hover {
         transform: translateY(-2px);
-        background: rgba(255, 255, 255, 0.1);
+        filter: brightness(1.2);
       }
 
       .chat-message.system {
@@ -629,6 +659,7 @@
 
     <script>
       const ROOM_ID = "{{ room_id }}";
+      const PLAYER_ID = "{{ session.get('player_id') }}";
     </script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     <script src="{{ url_for('static', filename='js/multiplayer.js') }}"></script>

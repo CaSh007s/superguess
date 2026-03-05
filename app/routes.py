@@ -10,6 +10,11 @@ from app import limiter
 
 main = Blueprint('main', __name__)
 
+@main.before_request
+def ensure_player_id():
+    if 'player_id' not in session:
+        session['player_id'] = str(uuid.uuid4())
+
 @main.route('/multiplayer/setup')
 def multiplayer_setup():
     return render_template('multiplayer_setup.html')

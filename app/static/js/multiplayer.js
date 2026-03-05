@@ -1,6 +1,7 @@
 const socket = io();
 
-let mySid = null;
+// Instead of tracking socket.id, we use the injected PLAYER_ID
+let mySid = PLAYER_ID;
 let isPlaying = false;
 let unreadCount = 0;
 let isChatOpen = window.innerWidth > 900;
@@ -36,11 +37,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   socket.on("connect", () => {
-    mySid = socket.id;
     socket.emit("join_game", {
       room_id: ROOM_ID,
       username: username,
       avatar: avatar,
+      player_id: PLAYER_ID,
     });
   });
 });
@@ -113,7 +114,7 @@ socket.on("guess_result", (data) => {
 });
 
 socket.on("opponent_proximity", (data) => {
-  if (data.sid !== mySid) {
+  if (data.player_id !== mySid) {
     // Update opponent's color aura and bar
     document.getElementById("oppAvatar").className =
       `player-avatar color-${data.color}`;
@@ -130,7 +131,7 @@ socket.on("game_over", (data) => {
   isPlaying = false;
   updatePlayersUI(data.state);
 
-  const isWinner = data.winner_sid === mySid;
+  const isWinner = data.winner_id === mySid;
 
   document.getElementById("guessBtn").disabled = true;
   document.getElementById("guessInput").disabled = true;
@@ -159,8 +160,20 @@ socket.on("game_over", (data) => {
 socket.on("chat_broadcast", (data) => {
   const chatBox = document.getElementById("chatBox");
   const div = document.createElement("div");
-  div.className = "chat-message";
-  div.innerHTML = `<strong style="color:var(--neon-pink)">${data.sender}:</strong> ${data.message}`;
+
+  // Theme check for bubble styling
+  const isStealth = document.body.classList.contains("theme-stealth");
+
+  if (data.sender_id === mySid) {
+    // It's me - Align Right
+    div.className = `chat-message self ${isStealth ? "stealth" : "arcade"}`;
+    div.innerHTML = `<span>${data.message}</span>`;
+  } else {
+    // It's them - Align Left
+    div.className = `chat-message opponent ${isStealth ? "stealth" : "arcade"}`;
+    div.innerHTML = `<strong>${data.sender}:</strong> <span>${data.message}</span>`;
+  }
+
   chatBox.appendChild(div);
   chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -172,10 +185,14 @@ socket.on("chat_broadcast", (data) => {
 function updatePlayersUI(state) {
   const players = state.players;
 
-  // Find me and opp
-  for (let sid in players) {
-    let p = players[sid];
-    if (sid === mySid) {
+  for (let pid in players) {
+    let p = players[pid];
+
+    // Dim avatar if they disconnected
+    const oppOpacity = p.connected ? "1" : "0.5";
+    const statusModifier = p.connected ? "" : " (Disconnected)";
+
+    if (pid === mySid) {
       document.getElementById("myName").textContent = p.name;
       document.getElementById("myAvatar").src = p.avatar;
       document.getElementById("myAvatar").className =
@@ -189,8 +206,8 @@ function updatePlayersUI(state) {
           ? "READY"
           : "WAITING";
     } else {
-      document.getElementById("oppPanel").style.opacity = "1";
-      document.getElementById("oppName").textContent = p.name;
+      document.getElementById("oppPanel").style.opacity = oppOpacity;
+      document.getElementById("oppName").textContent = p.name + statusModifier;
       document.getElementById("oppAvatar").src = p.avatar;
       document.getElementById("oppAvatar").className =
         `player-avatar color-${p.color}`;
@@ -215,7 +232,7 @@ function copyInvite() {
 }
 
 function markReady() {
-  socket.emit("player_ready", { room_id: ROOM_ID });
+  socket.emit("player_ready", { room_id: ROOM_ID, player_id: PLAYER_ID });
   document.getElementById("readyBtn").style.display = "none";
   document.getElementById("waitingText").textContent =
     "Waiting for Opponent...";
@@ -228,7 +245,11 @@ function submitGuess() {
   const val = input.value;
   if (!val) return;
 
-  socket.emit("make_guess", { room_id: ROOM_ID, guess: val });
+  socket.emit("make_guess", {
+    room_id: ROOM_ID,
+    guess: val,
+    player_id: PLAYER_ID,
+  });
 }
 
 function handleEnter(e) {
@@ -244,7 +265,11 @@ function sendChat() {
   const val = input.value.trim();
   if (!val) return;
 
-  socket.emit("chat_message", { room_id: ROOM_ID, message: val });
+  socket.emit("chat_message", {
+    room_id: ROOM_ID,
+    player_id: PLAYER_ID,
+    message: val,
+  });
   input.value = "";
 }
 
@@ -255,7 +280,11 @@ function sendQuickChat(code) {
     close: "I am getting so close! 🥵",
     wow: "Wow! 🤯",
   };
-  socket.emit("chat_message", { room_id: ROOM_ID, message: msgs[code] });
+  socket.emit("chat_message", {
+    room_id: ROOM_ID,
+    player_id: PLAYER_ID,
+    message: msgs[code],
+  });
   document.getElementById("emojiDropup").style.display = "none";
 }
 

@@ -60,29 +60,40 @@ def on_join_game(data):
     room_id = data.get('room_id')
     username = data.get('username')
     avatar = data.get('avatar')
+    player_id = data.get('player_id')
     
-    if not room_id or not username:
-        return {'status': 'error', 'message': 'Missing room or username'}
+    if not room_id or not username or not player_id:
+        return {'status': 'error', 'message': 'Missing room, username, or player ID'}
 
     room = get_room(room_id)
     if not room:
         return {'status': 'error', 'message': 'Room not found'}
         
-    # Check if full (max 2 players)
-    if len(room['players']) >= 2 and request.sid not in room['players']:
-        return {'status': 'error', 'message': 'Room is full'}
+    # Check if this player is already in the room (Reconnection)
+    if player_id in room['players']:
+        # They are rejoining! Just update their active socket ID
+        room['players'][player_id]['sid'] = request.sid
+        room['players'][player_id]['connected'] = True
+    else:
+        # Check if full (max 2 players)
+        if len(room['players']) >= 2:
+            return {'status': 'error', 'message': 'Room is full'}
 
-    # Add player
-    room['players'][request.sid] = {
-        'name': username,
-        'avatar': avatar,
-        'ready': False,
-        'score': 0,
-        'color': 'bg-primary'
-    }
+        # Add new player
+        room['players'][player_id] = {
+            'sid': request.sid,
+            'name': username,
+            'avatar': avatar,
+            'ready': False,
+            'score': 0,
+            'color': 'bg-primary',
+            'connected': True
+        }
     
     save_room(room_id, room)
-    sid_to_room[request.sid] = room_id
+    
+    # We map their socket to both room and player_id for quick disconnect handling
+    sid_to_room[request.sid] = {'room_id': room_id, 'player_id': player_id}
     join_room(room_id)
     
     # Broadcast updated player list
@@ -92,10 +103,11 @@ def on_join_game(data):
 @socketio.on('player_ready')
 def on_player_ready(data):
     room_id = data.get('room_id')
+    player_id = data.get('player_id')
     room = get_room(room_id)
     
-    if room and request.sid in room['players']:
-        room['players'][request.sid]['ready'] = True
+    if room and player_id in room['players']:
+        room['players'][player_id]['ready'] = True
         save_room(room_id, room)
         emit('room_update', get_room_state(room_id), to=room_id)
         
@@ -108,22 +120,24 @@ def on_player_ready(data):
 def on_chat_message(data):
     room_id = data.get('room_id')
     message = data.get('message')
+    player_id = data.get('player_id')
     room = get_room(room_id)
     
-    if room and request.sid in room['players']:
+    if room and player_id in room['players']:
         # Update TTL via re-save so chat keeps room alive
         save_room(room_id, room) 
-        player_name = room['players'][request.sid]['name']
-        emit('chat_broadcast', {'sender': player_name, 'message': message}, to=room_id)
+        player_name = room['players'][player_id]['name']
+        emit('chat_broadcast', {'sender_id': player_id, 'sender': player_name, 'message': message}, to=room_id)
 
 @socketio.on('make_guess')
 def on_make_guess(data):
     room_id = data.get('room_id')
     guess_str = data.get('guess')
+    player_id = data.get('player_id')
     sid = request.sid
     
     room = get_room(room_id)
-    if not room or sid not in room['players'] or room['status'] != 'playing':
+    if not room or player_id not in room['players'] or room['status'] != 'playing':
         return
 
     try:
@@ -136,8 +150,8 @@ def on_make_guess(data):
     if guess == secret:
         # We have a winner!
         room['status'] = 'finished'
-        winner_name = room['players'][sid]['name']
-        room['players'][sid]['score'] += 1
+        winner_name = room['players'][player_id]['name']
+        room['players'][player_id]['score'] += 1
         
         # Reset ready states
         for p in room['players'].values():
@@ -147,7 +161,7 @@ def on_make_guess(data):
         save_room(room_id, room)
         emit('game_over', {
             'winner': winner_name,
-            'winner_sid': sid,
+            'winner_id': player_id,
             'secret_number': secret,
             'state': get_room_state(room_id)
         }, to=room_id)
@@ -159,7 +173,7 @@ def on_make_guess(data):
         if diff >= 100: percent = 5
         else: percent = 100 - diff
         
-        room['players'][sid]['color'] = color
+        room['players'][player_id]['color'] = color
         save_room(room_id, room)
         
         # Send exact response to the guesser
@@ -173,22 +187,26 @@ def on_make_guess(data):
         
         # Broadcast the color change logic to the room
         emit('opponent_proximity', {
-            'sid': sid,
+            'player_id': player_id,
             'color': color,
             'proximity': percent
         }, to=room_id)
 
 @socketio.on('disconnect')
 def on_disconnect():
-    room_id = sid_to_room.pop(request.sid, None)
-    if room_id:
+    session_data = sid_to_room.pop(request.sid, None)
+    if session_data:
+        room_id = session_data['room_id']
+        player_id = session_data['player_id']
         room = get_room(room_id)
-        if room and request.sid in room['players']:
-            del room['players'][request.sid]
+        
+        if room and player_id in room['players']:
+            # We don't delete them immediately, just mark as disconnected
+            room['players'][player_id]['connected'] = False
             save_room(room_id, room)
             emit('room_update', get_room_state(room_id), to=room_id)
-            if len(room['players']) == 0:
-                delete_room(room_id)
+            
+            # Note: We let the Redis TTL handle deleting abandoned rooms (15 mins)
 
 def start_round(room_id):
     room = get_room(room_id)
@@ -204,13 +222,20 @@ def start_round(room_id):
 def get_room_state(room_id):
     room = get_room(room_id)
     if not room: return {}
-    # Strip sensitive info
+    # Strip sensitive info (like secret_number and socket IDs)
     return {
         'id': room_id,
         'difficulty': room['difficulty'],
         'status': room['status'],
         'players': {
-            sid: {'name': p['name'], 'avatar': p['avatar'], 'ready': p['ready'], 'score': p['score'], 'color': p['color']}
-            for sid, p in room['players'].items()
+            pid: {
+                'name': p['name'], 
+                'avatar': p['avatar'], 
+                'ready': p['ready'], 
+                'score': p['score'], 
+                'color': p['color'],
+                'connected': p.get('connected', True)
+            }
+            for pid, p in room['players'].items()
         }
     }
