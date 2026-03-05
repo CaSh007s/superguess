@@ -70,7 +70,14 @@ socket.on("round_start", (data) => {
   const feedbackMsg = document.getElementById("feedback");
   feedbackMsg.innerHTML = `<h3>Match Started!</h3><p>First to crack it wins!</p>`;
   feedbackMsg.className = "feedback-box display-default";
-  document.getElementById("proximityBar").style.width = "0%";
+
+  // Reset all bars
+  let myBar = document.getElementById("myProximityBar");
+  myBar.style.width = "0%";
+  myBar.className = "mini-bar-fill fill-bg-primary";
+  let oppBar = document.getElementById("oppProximityBar");
+  oppBar.style.width = "0%";
+  oppBar.className = "mini-bar-fill fill-bg-primary";
 
   addSystemChat("The match has begun! Good luck.");
 });
@@ -80,9 +87,9 @@ socket.on("guess_result", (data) => {
   feedbackMsg.innerHTML = `<h3>${data.message}</h3><p>Your guess: <b>${data.guess}</b></p>`;
   feedbackMsg.className = `feedback-box ${data.bar_color}`;
 
-  const proxBar = document.getElementById("proximityBar");
-  proxBar.style.width = `${data.proximity}%`;
-  proxBar.style.backgroundColor = "var(--neon-pink)";
+  const myBar = document.getElementById("myProximityBar");
+  myBar.style.width = `${data.proximity}%`;
+  myBar.className = `mini-bar-fill fill-${data.bar_color}`;
 
   document.getElementById("guessInput").value = "";
   document.getElementById("guessInput").focus();
@@ -90,9 +97,12 @@ socket.on("guess_result", (data) => {
 
 socket.on("opponent_proximity", (data) => {
   if (data.sid !== mySid) {
-    // Update opponent's color aura
+    // Update opponent's color aura and bar
     document.getElementById("oppAvatar").className =
       `player-avatar color-${data.color}`;
+    const oppBar = document.getElementById("oppProximityBar");
+    oppBar.style.width = `${data.proximity}%`;
+    oppBar.className = `mini-bar-fill fill-${data.color}`;
   } else {
     document.getElementById("myAvatar").className =
       `player-avatar color-${data.color}`;
@@ -120,7 +130,11 @@ socket.on("game_over", (data) => {
     addSystemChat(`${data.winner} won the round!`);
   }
 
-  document.getElementById("proximityBar").style.width = "100%";
+  if (isWinner) {
+    document.getElementById("myProximityBar").style.width = "100%";
+  } else {
+    document.getElementById("oppProximityBar").style.width = "100%";
+  }
 
   document.getElementById("rematchBtn").style.display = "block";
 });

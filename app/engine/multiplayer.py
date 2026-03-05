@@ -174,7 +174,8 @@ def on_make_guess(data):
         # Broadcast the color change logic to the room
         emit('opponent_proximity', {
             'sid': sid,
-            'color': color
+            'color': color,
+            'proximity': percent
         }, to=room_id)
 
 @socketio.on('disconnect')

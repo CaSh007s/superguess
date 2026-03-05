@@ -18,11 +18,29 @@
       .vs-container {
         display: grid;
         grid-template-columns: 1fr 2fr 1fr;
+        grid-template-areas:
+          "p1 center p2"
+          ".  center chat";
         gap: 20px;
         width: 100%;
         max-width: 1200px;
         margin: 0 auto;
         padding: 20px;
+      }
+
+      #mePanel {
+        grid-area: p1;
+        margin-bottom: 20px;
+      }
+      .center-board {
+        grid-area: center;
+      }
+      #oppPanel {
+        grid-area: p2;
+        margin-bottom: 20px;
+      }
+      .chat-panel {
+        grid-area: chat;
       }
 
       .player-panel {
@@ -71,6 +89,25 @@
         border: 1px solid var(--border-color);
       }
 
+      .mini-bar-container {
+        width: 100%;
+        height: 12px;
+        background: rgba(0, 0, 0, 0.6);
+        border-radius: 6px;
+        margin-top: 15px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+      }
+
+      .mini-bar-fill {
+        width: 0%;
+        height: 100%;
+        transition:
+          width 0.4s cubic-bezier(0.1, 0.7, 1, 0.1),
+          background-color 0.3s,
+          box-shadow 0.3s;
+      }
+
       .center-board {
         display: flex;
         flex-direction: column;
@@ -104,6 +141,35 @@
       }
       .color-bg-very-cold {
         border-color: #a29bfe;
+        box-shadow: 0 0 10px #a29bfe;
+      }
+
+      .fill-bg-primary {
+        background-color: var(--neon-blue);
+        box-shadow: 0 0 10px var(--neon-blue);
+      }
+      .fill-bg-very-hot {
+        background-color: #ff0000;
+        box-shadow: 0 0 15px #ff0000;
+      }
+      .fill-bg-hot {
+        background-color: #ff4757;
+        box-shadow: 0 0 12px #ff4757;
+      }
+      .fill-bg-warm {
+        background-color: #ffa502;
+        box-shadow: 0 0 10px #ffa502;
+      }
+      .fill-bg-cool {
+        background-color: #eccc68;
+        box-shadow: 0 0 10px #eccc68;
+      }
+      .fill-bg-cold {
+        background-color: #1e90ff;
+        box-shadow: 0 0 10px #1e90ff;
+      }
+      .fill-bg-very-cold {
+        background-color: #a29bfe;
         box-shadow: 0 0 10px #a29bfe;
       }
 
@@ -221,17 +287,55 @@
       /* Mobile handling */
       @media (max-width: 900px) {
         .vs-container {
-          grid-template-columns: 1fr;
-        }
-        .player-panel {
-          flex-direction: row;
-          justify-content: space-around;
+          grid-template-columns: 1fr 1fr;
+          grid-template-areas:
+            "p1 p2"
+            "center center"
+            "chat chat";
+          gap: 15px;
           padding: 10px;
         }
+
+        #mePanel {
+          margin-bottom: 0px;
+        }
+        #oppPanel {
+          margin-bottom: 0px;
+        }
+
+        .player-panel {
+          padding: 15px 10px;
+        }
         .player-avatar {
-          width: 60px;
-          height: 60px;
-          margin: 0;
+          width: 70px;
+          height: 70px;
+          margin-bottom: 10px;
+        }
+
+        /* -- Bolder Mobile Chat -- */
+        .chat-panel {
+          background: var(
+            --glass-bg,
+            rgba(20, 20, 20, 0.8)
+          ); /* Solidifies background */
+          border: 2px solid var(--neon-blue); /* Theme-aware bright border */
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9); /* Deep separation shadow */
+          border-radius: 20px;
+          height: 380px; /* Adjust height for mobile viewport */
+        }
+
+        .chat-input-area {
+          background: rgba(0, 0, 0, 0.9);
+          padding: 12px;
+          border-bottom-left-radius: 20px;
+          border-bottom-right-radius: 20px;
+        }
+
+        .chat-btn {
+          background: rgba(255, 255, 255, 0.1);
+          padding: 6px 16px;
+          border-radius: 20px;
+          margin-left: 5px;
         }
       }
     </style>
@@ -262,10 +366,16 @@
           src=""
           alt="Me"
         />
-        <div>
+        <div style="width: 100%">
           <div class="player-name" id="myName">Connecting...</div>
           <div class="player-score" id="myScore">Wins: 0</div>
           <div class="player-status" id="myStatus">WAITING</div>
+          <div class="mini-bar-container">
+            <div
+              class="mini-bar-fill fill-bg-primary"
+              id="myProximityBar"
+            ></div>
+          </div>
         </div>
       </div>
 
@@ -337,14 +447,6 @@
               <p>First to guess the number wins.</p>
             </div>
 
-            <div class="proximity-bar-container">
-              <div
-                class="proximity-bar"
-                id="proximityBar"
-                style="width: 0%; background: var(--border-color)"
-              ></div>
-            </div>
-
             <input
               type="number"
               id="guessInput"
@@ -384,10 +486,16 @@
             src="https://api.dicebear.com/7.x/bottts/svg?seed=waiting"
             alt="Opponent"
           />
-          <div>
+          <div style="width: 100%">
             <div class="player-name" id="oppName">Waiting for P2...</div>
             <div class="player-score" id="oppScore">Wins: 0</div>
             <div class="player-status" id="oppStatus">---</div>
+            <div class="mini-bar-container">
+              <div
+                class="mini-bar-fill fill-bg-primary"
+                id="oppProximityBar"
+              ></div>
+            </div>
           </div>
         </div>
 
