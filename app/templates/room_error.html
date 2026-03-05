@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SuperGuess | Access Denied</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔮</text></svg>"
+    />
+  </head>
+  <body>
+    <button
+      id="theme-btn"
+      onclick="toggleTheme()"
+      class="btn btn-secondary"
+      style="
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: auto;
+        font-size: 0.8rem;
+        z-index: 10;
+      "
+    >
+      🕹️ MODE: ARCADE
+    </button>
+
+    <div class="container fade-in">
+      <div class="glass-card" style="max-width: 500px">
+        <h1 class="logo" style="font-size: 2rem">
+          ACCESS <span class="highlight" style="color: #ff4757">DENIED</span>
+        </h1>
+
+        <div
+          style="
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid rgba(255, 71, 87, 0.5);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+          "
+        >
+          <h2
+            style="
+              color: #ff4757;
+              font-family: &quot;Orbitron&quot;;
+              margin-top: 0;
+            "
+          >
+            {{ error_title }}
+          </h2>
+          <p style="color: #fff; font-size: 1.1rem; margin-bottom: 0">
+            {{ error_message }}
+          </p>
+        </div>
+
+        <div
+          class="menu-buttons"
+          style="
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+          "
+        >
+          <a
+            href="{{ url_for('main.multiplayer_setup') }}"
+            class="btn btn-primary glitch-effect"
+            style="
+              text-decoration: none;
+              text-align: center;
+              width: 100%;
+              box-sizing: border-box;
+            "
+          >
+            CREATE NEW ROOM
+          </a>
+          <a
+            href="{{ url_for('main.index') }}"
+            class="btn btn-secondary"
+            style="
+              display: block;
+              text-decoration: none;
+              text-align: center;
+              width: 100%;
+              box-sizing: border-box;
+            "
+          >
+            RETURN TO BASE
+          </a>
+        </div>
+      </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  </body>
+</html>

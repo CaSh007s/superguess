@@ -512,27 +512,29 @@
           </h2>
 
           <div id="lobbyView">
-            <p>Invite a friend to join this room.</p>
-            <input
-              type="text"
-              readonly
-              id="inviteLink"
-              class="neon-input"
-              style="
-                width: 100%;
-                font-size: 0.8rem;
-                text-align: center;
-                margin-bottom: 10px;
-              "
-              value=""
-            />
-            <button
-              class="btn btn-secondary"
-              onclick="copyInvite()"
-              style="font-size: 0.8rem"
-            >
-              COPY LINK
-            </button>
+            <div id="inviteSection">
+              <p>Invite a friend to join this room.</p>
+              <input
+                type="text"
+                readonly
+                id="inviteLink"
+                class="neon-input"
+                style="
+                  width: 100%;
+                  font-size: 0.8rem;
+                  text-align: center;
+                  margin-bottom: 10px;
+                "
+                value=""
+              />
+              <button
+                class="btn btn-secondary"
+                onclick="copyInvite()"
+                style="font-size: 0.8rem"
+              >
+                COPY LINK
+              </button>
+            </div>
 
             <hr
               style="border-color: rgba(255, 255, 255, 0.1); margin: 20px 0"

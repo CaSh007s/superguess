@@ -43,7 +43,16 @@ def multiplayer_create():
 def multiplayer_room(room_id):
     room = get_room(room_id)
     if not room:
-        return "Room not found or has expired.", 404
+        return render_template('room_error.html', 
+                               error_title="ROOM NOT FOUND", 
+                               error_message="The transmission signal was lost. This room has expired or does not exist."), 404
+    
+    # Reject third players who aren't already in the room
+    player_id = session.get('player_id')
+    if len(room['players']) >= 2 and player_id not in room['players']:
+        return render_template('room_error.html', 
+                               error_title="ROOM IS FULL", 
+                               error_message="This room already has its maximum operative capacity (2/2). Access denied."), 403
         
     return render_template('multiplayer_room.html', room_id=room_id, difficulty=room['difficulty'], range_top=room['range_top'])
 

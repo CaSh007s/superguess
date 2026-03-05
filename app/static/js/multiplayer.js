@@ -37,12 +37,20 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   socket.on("connect", () => {
-    socket.emit("join_game", {
-      room_id: ROOM_ID,
-      username: username,
-      avatar: avatar,
-      player_id: PLAYER_ID,
-    });
+    socket.emit(
+      "join_game",
+      {
+        room_id: ROOM_ID,
+        username: username,
+        avatar: avatar,
+        player_id: PLAYER_ID,
+      },
+      (response) => {
+        if (response && response.status === "error") {
+          window.location.reload();
+        }
+      },
+    );
   });
 });
 
@@ -52,24 +60,54 @@ socket.on("room_update", (roomData) => {
   updatePlayersUI(roomData);
 
   const pCount = Object.keys(roomData.players).length;
-  if (pCount === 2 && roomData.status === "waiting") {
-    document.getElementById("readyBtn").style.display = "block";
-    document.getElementById("waitingText").textContent =
-      "Waiting for both players to mark Ready...";
-  } else if (pCount < 2) {
-    document.getElementById("readyBtn").style.display = "none";
-    document.getElementById("waitingText").textContent =
-      "Waiting for opponent...";
 
-    // Reset Opponent View
-    document.getElementById("oppPanel").style.opacity = "0.5";
-    document.getElementById("oppName").textContent = "Waiting for P2...";
-    document.getElementById("oppAvatar").src =
-      "https://api.dicebear.com/7.x/bottts/svg?seed=waiting";
-    document.getElementById("oppAvatar").className =
-      `player-avatar color-bg-primary`;
-    document.getElementById("oppScore").textContent = `Wins: 0`;
-    document.getElementById("oppStatus").textContent = "---";
+  if (roomData.status === "playing") {
+    // Reconnected mid-game
+    isPlaying = true;
+    document.getElementById("lobbyView").style.display = "none";
+    document.getElementById("gameView").style.display = "block";
+    document.getElementById("rematchBtn").style.display = "none";
+    document.getElementById("guessBtn").disabled = false;
+    document.getElementById("guessInput").disabled = false;
+
+    const feedbackMsg = document.getElementById("feedback");
+    feedbackMsg.innerHTML = `<h3>Reconnected!</h3><p>Jump back in, the game is live!</p>`;
+    feedbackMsg.className = "feedback-box display-default";
+  } else if (roomData.status === "finished") {
+    // Reconnected post-game
+    isPlaying = false;
+    document.getElementById("lobbyView").style.display = "none";
+    document.getElementById("gameView").style.display = "block";
+    document.getElementById("guessBtn").disabled = true;
+    document.getElementById("guessInput").disabled = true;
+    document.getElementById("rematchBtn").style.display = "block";
+  } else {
+    // Status is 'waiting'
+    if (pCount === 2) {
+      document.getElementById("inviteSection").style.display = "none";
+      document.getElementById("readyBtn").style.display = "block";
+      document.getElementById("waitingText").textContent =
+        "Waiting for both players to mark Ready...";
+      document.getElementById("lobbyView").style.display = "block";
+      document.getElementById("gameView").style.display = "none";
+    } else if (pCount < 2) {
+      document.getElementById("inviteSection").style.display = "block";
+      document.getElementById("readyBtn").style.display = "none";
+      document.getElementById("waitingText").textContent =
+        "Waiting for opponent...";
+      document.getElementById("lobbyView").style.display = "block";
+      document.getElementById("gameView").style.display = "none";
+
+      // Reset Opponent View
+      document.getElementById("oppPanel").style.opacity = "0.5";
+      document.getElementById("oppName").textContent = "Waiting for P2...";
+      document.getElementById("oppAvatar").src =
+        "https://api.dicebear.com/7.x/bottts/svg?seed=waiting";
+      document.getElementById("oppAvatar").className =
+        `player-avatar color-bg-primary`;
+      document.getElementById("oppScore").textContent = `Wins: 0`;
+      document.getElementById("oppStatus").textContent = "---";
+    }
   }
 });
 
